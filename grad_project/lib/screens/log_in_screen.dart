@@ -15,21 +15,26 @@ class LogInScreen extends StatefulWidget {
 
 class _LogInScreenState extends State<LogInScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  TextEditingController _usernameController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
-  FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  bool _isLoading = false;
   String _statusMessage = '';
 
   Future<void> _login() async {
+
     try {
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
         email: _usernameController.text.trim(),
         password: _passwordController.text.trim(),
       );
+      setState(() {
+        _isLoading = true;
+      });
       // Login success, navigate to home screen
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => LayoutScreen()));
+          context, MaterialPageRoute(builder: (context) => const LayoutScreen()));
     } on FirebaseAuthException catch (e) {
       setState(() {
         _statusMessage = e.message ?? 'Unknown error occurred';
@@ -49,7 +54,7 @@ class _LogInScreenState extends State<LogInScreen> {
               const SizedBox(
                 height: 150,
               ),
-              Text(
+              const Text(
                 'Handy',
                 style: TextStyle(
                     color: Color(0xFFFFDB58), fontSize: 30, fontWeight: FontWeight.bold,fontStyle: FontStyle.italic),
@@ -58,7 +63,7 @@ class _LogInScreenState extends State<LogInScreen> {
                 height: 35,
               ),
               Container(
-                margin: EdgeInsets.symmetric(horizontal: 20),
+                margin: const EdgeInsets.symmetric(horizontal: 20),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
                 ),
@@ -66,30 +71,32 @@ class _LogInScreenState extends State<LogInScreen> {
                   children: [
                     Container(
                       height: 50,
-                      padding: EdgeInsets.all(10),
-                      margin: EdgeInsets.symmetric(vertical: 10),
+                      padding: const EdgeInsets.all(10),
+                      margin: const EdgeInsets.symmetric(vertical: 10),
                       decoration: BoxDecoration(
                         color: Colors.grey[100],
                       ),
                       child: TextField(
                         controller: _usernameController,
-                        decoration: InputDecoration.collapsed(hintText: 'Email'),
+                        decoration: const InputDecoration.collapsed(hintText: 'Email'),
                       ),
                     ),
                     Container(
                       height: 50,
-                      padding: EdgeInsets.all(10),
+                      padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         color: Colors.grey[100],
                       ),
                       child: TextField(
                         controller: _passwordController,
-                        decoration: InputDecoration.collapsed(hintText: 'Password'),
+                        decoration: const InputDecoration.collapsed(hintText: 'Password'),
                         obscureText: true, // To hide the password input
                       ),
                     ),
-                    Container(
-                      margin: EdgeInsets.symmetric(vertical: 25),
+                    _isLoading
+                        ? const CircularProgressIndicator()
+                    :Container(
+                      margin: const EdgeInsets.symmetric(vertical: 25),
                       width: double.infinity,
                       child: ElevatedButton(
                         // Use ElevatedButton instead of FloatingActionButton
@@ -97,8 +104,8 @@ class _LogInScreenState extends State<LogInScreen> {
                           _login(); // Call the _login method
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFFFFDB58),
-                          padding: EdgeInsets.symmetric(vertical: 15),
+                          backgroundColor: const Color(0xFFFFDB58),
+                          padding: const EdgeInsets.symmetric(vertical: 15),
                         ),
                         child: const Text(
                           'Log In',
@@ -130,20 +137,20 @@ class _LogInScreenState extends State<LogInScreen> {
                       ],
                     ),
                     Container(
-                      margin: EdgeInsets.symmetric(vertical: 30),
+                      margin: const EdgeInsets.symmetric(vertical: 30),
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => SignUpScreen(),
+                              builder: (context) => const SignUpScreen(),
                             ),
                           );
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
-                          padding: EdgeInsets.symmetric(vertical: 15),
+                          padding: const EdgeInsets.symmetric(vertical: 15),
                         ),
                         child: const Text(
                           'Create New Account',

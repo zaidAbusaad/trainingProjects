@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:grad_project/components/cutom_shapes/curved_edges.dart';
-import 'package:grad_project/components/service_grid.dart';
 
 import '../components/cutom_shapes/circular_container.dart';
+import '../components/cutom_shapes/curved_edges.dart';
+import '../components/service_grid.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+class HomeScreenEmployee extends StatelessWidget {
+  const HomeScreenEmployee({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,12 +27,12 @@ class HomeScreen extends StatelessWidget {
                 height: screenHeight * .3,
                 child: Stack(
                   children: [
-                     Positioned(
+                    Positioned(
                       top: -150,
                       right: -250,
                       child: CircularContainer(bgColor: Colors.white.withOpacity(0.3),),
                     ),
-                     Positioned(
+                    Positioned(
                       top: 100,
                       right: -300,
                       child: CircularContainer(bgColor: Colors.white.withOpacity(0.3),),
