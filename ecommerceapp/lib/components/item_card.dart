@@ -9,7 +9,6 @@ class ItemCard extends StatelessWidget {
   const ItemCard({super.key, required this.items});
 
   final ItemModel items;
-
   @override
   Widget build(BuildContext context) {
     final cubit = ProductCubit.get(context);
