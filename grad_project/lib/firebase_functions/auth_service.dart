@@ -3,9 +3,19 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../models/user_model.dart';
 import '../screens/log_in_screen.dart';
+import 'database_service.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  // Create an AppUser object based on Firebase User
+  UserModel? _userFromFirebaseUser(User? firebaseUser) {
+    return firebaseUser != null ? UserModel(uid: firebaseUser.uid) : null;
+  }
+
+  // auth change user stream
+  Stream<UserModel?> get firebaseUser {
+    return _auth.authStateChanges().map((User? firebaseUser) => _userFromFirebaseUser(firebaseUser));
+  }
 
   // Sign up function for Firebase Authentication
   Future<UserCredential?> signUp({
@@ -40,7 +50,7 @@ class AuthService {
       email: email,
       age: age,
       phoneNumber: phoneNumber,
-      password: password,
+      password: password, uid: '',
     );
   }
 
@@ -58,42 +68,41 @@ class AuthService {
     if (formKey.currentState!.validate()) {
       isLoading.value = true; // Start loading
     }
-      try {
-        await signUp(email: email, password: password);
-
-
-        // Save user data to the model
-        final userModel = _saveToModel(
-          name: name,
-          email: email,
-          age: age,
-          phoneNumber: phoneNumber,
-          password: password,
+    try {
+      UserCredential result = await _auth.createUserWithEmailAndPassword(email: email, password: password);
+      User? user = result.user;
+      if (user != null) {
+        await DatabaseService(uid: user.uid).updateUserData(
+            name, // You may replace this with an actual name if available
+            email, // Store the registered email
+            age,
+            phoneNumber,
         );
-
-        print("User Created: Name - ${userModel.name}, Email - ${userModel.email}");
-
-        await FirebaseFirestore.instance.collection('customers').add({
-          'name': name,
-          'email': email,
-          'age': age,
-          'phoneNumber': phoneNumber,
-          'createdAt': DateTime.now(),
-        });
-
-        print("User data saved to Firestore");
-
-        // Navigate to Login Screen
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const LogInScreen()),
-        );
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
-        );
-      } finally {
-        isLoading.value = false; // Stop loading
       }
+
+
+      // Save user data to the model
+      final userModel = _saveToModel(
+        name: name,
+        email: email,
+        age: age,
+        phoneNumber: phoneNumber,
+        password: password,
+      );
+
+      print("User Created: Name - ${userModel.name}, Email - ${userModel.email}");
+
+      // Navigate to Login Screen
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const LogInScreen()),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    } finally {
+      isLoading.value = false; // Stop loading
+    }
 
   }
 }
