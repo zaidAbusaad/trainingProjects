@@ -1,19 +1,30 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:grad_project/models/service_card_model.dart';
-
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+import '../models/media_provider.dart';
+import '../models/request_model.dart';
+import '../models/service_card_model.dart';
 import '../components/cutom_shapes/circular_container.dart';
 import '../components/cutom_shapes/curved_edges.dart';
-import 'map_page.dart'; // Assuming you have a MapPage class in your project.
+import 'package:video_player/video_player.dart';
+
+import 'map_page.dart';
+
 
 class RequestScreen extends StatelessWidget {
   const RequestScreen({super.key, required this.field});
 
- final ServiceCardModel field;
+  final ServiceCardModel field;
+
   @override
   Widget build(BuildContext context) {
-    var screenWidth = MediaQuery.of(context).size.width;
-    var screenHeight = MediaQuery.of(context).size.height;
-    var fieldname= field.fieldName;
+    var mediaProvider = Provider.of<MediaProvider>(context);
+    final TextEditingController titleController = TextEditingController();
+    final TextEditingController descriptionController = TextEditingController();
+    LatLng? selectedLocation; // Store selected location
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -22,130 +33,105 @@ class RequestScreen extends StatelessWidget {
             ClipPath(
               clipper: CurvedEdges(),
               child: Container(
-                padding: const EdgeInsets.all(0),
-                height: screenHeight * .15,
-                decoration: const BoxDecoration(
-                  color: Colors.blue,
-                ),
-                child: SizedBox(
-                  height: screenHeight * .3,
-                  child: Stack(
-                    children: [
-                      const Positioned(
-                        top: -150,
-                        right: -250,
-                        child: CircularContainer(),
+                height: 150,
+                decoration: const BoxDecoration(color: Colors.blue),
+                child: Stack(
+                  children: [
+                    const Positioned(
+                      top: -150,
+                      right: -250,
+                      child: CircularContainer(),
+                    ),
+                    const Positioned(
+                      top: 100,
+                      right: -300,
+                      child: CircularContainer(),
+                    ),
+                    Positioned(
+                      top: 40,
+                      left: 10,
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_back, color: Colors.white),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
                       ),
-                      const Positioned(
-                        top: 100,
-                        right: -300,
-                        child: CircularContainer(),
-                      ),
-                      Positioned(
-                        top: 40,
-                        left: 10,
-                        child: IconButton(
-                          icon: const Icon(
-                            Icons.arrow_back,
-                            color: Colors.white,
-                          ),
-                          onPressed: () {
-                            Navigator.pop(
-                                context); // Navigates back to the previous page
-                          },
+                    ),
+                    Positioned(
+                      top: 50,
+                      left: 60,
+                      child: const Text(
+                        'Handy.',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 25,
+                          fontStyle: FontStyle.italic,
                         ),
                       ),
-                      const Positioned(
-                        top: 50,
-                        left: 60,
-                        child: Text(
-                          'Handy.',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 25,
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
-
-            // Title and Subtitle
-             Text(
-              'In need of an $fieldname!',
-              style: const TextStyle(
+            // Title Section
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                'In need of an ${field.fieldName}!',
+                style: const TextStyle(
                   color: Colors.black,
                   fontSize: 25,
-                  fontWeight: FontWeight.bold),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
             const Text(
               'Help us understand your problem..',
               style: TextStyle(fontSize: 18),
             ),
             const Divider(),
-
             // Request Title Field
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: TextField(
+                controller: titleController,
                 decoration: const InputDecoration(
                   labelText: 'Add a title for your request',
                   border: OutlineInputBorder(),
                 ),
               ),
             ),
-
-            // Location Field
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                decoration: const InputDecoration(
-                  labelText: 'What’s your location...',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ),
-
             // Description Field
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: EdgeInsets.all(8.0),
               child: TextField(
+                controller: descriptionController,
                 maxLines: 4,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Provide a detailed description of the problem',
                   border: OutlineInputBorder(),
                 ),
               ),
             ),
-
-            // Image or Video Upload
+            // Image and Video Upload Buttons
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   ElevatedButton.icon(
-                    onPressed: () {
-                      // Add functionality for image upload
-                    },
+                    onPressed: () => _showImageSourceDialog(context),
                     icon: const Icon(Icons.image),
-                    label: const Text('Upload Image'),
+                    label: const Text('Upload Images'),
                   ),
                   ElevatedButton.icon(
-                    onPressed: () {
-                      // Add functionality for video upload
-                    },
+                    onPressed: () => _showVideoSourceDialog(context),
                     icon: const Icon(Icons.videocam),
                     label: const Text('Upload Video'),
                   ),
                 ],
               ),
             ),
-
-            // Google Maps Button
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton.icon(
@@ -159,10 +145,134 @@ class RequestScreen extends StatelessWidget {
                 label: const Text('Open Google Maps'),
               ),
             ),
+            const Divider(),
+            // Display Selected Images
+            if ((mediaProvider.selectedImages != null &&
+                    mediaProvider.selectedImages!.isNotEmpty) ||
+                (mediaProvider.controller != null &&
+                    mediaProvider.controller!.value.isInitialized))
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Wrap(
+                  spacing: 8.0,
+                  runSpacing: 8.0,
+                  children: [
+                    // Display Images
+                    if (mediaProvider.selectedImages != null &&
+                        mediaProvider.selectedImages!.isNotEmpty)
+                      ...mediaProvider.selectedImages!
+                          .map((image) =>
+                              Image.file(image, width: 100, height: 100))
+                          .toList(),
+                    // Display Video
+                    if (mediaProvider.controller != null &&
+                        mediaProvider.controller!.value.isInitialized)
+                      SizedBox(
+                        width: 100,
+                        height: 100,
+                        child: AspectRatio(
+                          aspectRatio:
+                              mediaProvider.controller!.value.aspectRatio,
+                          child: VideoPlayer(mediaProvider.controller!),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+
+            Positioned(
+
+              right: 10,
+              bottom: 10,
+              child:  ElevatedButton(
+                onPressed: () async {
+                  // Collect data from user inputs
+                  final request = RequestModel(
+                    title: titleController.text,
+                    description: descriptionController.text,
+
+                    images: mediaProvider.selectedImages,
+                    video: mediaProvider.selectedVideo,
+                  );
+
+                  // Save request to Firebase
+                  await request.saveToFirebase();
+
+                  // Provide feedback to the user
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Request submitted successfully!")),
+                  );
+
+                  Navigator.pop(context); // Return to the previous screen
+                },
+                child: const Text('Submit'),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
-}
 
+  // Dialog to choose image source
+  void _showImageSourceDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Choose Image Source'),
+        content: const Text(
+          'Do you want to pick from the gallery or take pictures using the camera?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              Provider.of<MediaProvider>(context, listen: false)
+                  .pickMultipleImages();
+            },
+            child: const Text('Gallery'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              Provider.of<MediaProvider>(context, listen: false)
+                  .captureMultipleImages(context);
+            },
+            child: const Text('Camera'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Dialog to choose video source
+  void _showVideoSourceDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Choose Video Source'),
+        content: const Text(
+          'Do you want to pick a video from the gallery or record using the camera?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              Provider.of<MediaProvider>(context, listen: false)
+                  .pickVideo(ImageSource.gallery);
+            },
+            child: const Text('Gallery'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              Provider.of<MediaProvider>(context, listen: false)
+                  .pickVideo(ImageSource.camera);
+            },
+            child: const Text('Camera'),
+          ),
+        ],
+      ),
+    );
+  }
+}
