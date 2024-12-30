@@ -9,13 +9,19 @@ import 'package:grad_project/screens/layout_screen.dart';
 import 'package:grad_project/screens/log_in_screen.dart';
 import 'package:grad_project/screens/map_page.dart';
 import 'package:grad_project/screens2/home_screen_employee.dart';
+import 'package:provider/provider.dart';
+
+import 'models/media_provider.dart';
 
 // ...
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(const MyApp());
+  runApp(ChangeNotifierProvider(
+    create: (context) => MediaProvider(),
+    child: MyApp(),
+  ),);
 }
 
 class MyApp extends StatelessWidget {
@@ -30,7 +36,7 @@ class MyApp extends StatelessWidget {
       ],
       child:  const MaterialApp(
         debugShowCheckedModeBanner: false,
-        home:  LogInScreen(),
+        home:  LayoutScreen(),
         ),
 
 

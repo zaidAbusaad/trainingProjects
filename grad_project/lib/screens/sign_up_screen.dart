@@ -86,34 +86,36 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           return isLoading
                               ? const CircularProgressIndicator()
                               : ElevatedButton(
-                                  onPressed: () async {
-                                    // Only call the function without directly modifying _isLoading
-                                    await _authService.fullSignUp(
-                                      context: context,
-                                      age: int.parse(_ageController.text),
-                                      email: _emailController.text.trim(),
-                                      formKey: _formKey,
-                                      isLoading: _isLoading,
-                                      // Handled inside fullSignUp
-                                      name: _usernameController.text,
-                                      password: _passwordController.text.trim(),
-                                      phoneNumber: _phonenumberController.text,
-                                    );
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.green,
-                                    minimumSize:
-                                        const Size(double.infinity, 50),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                  child: const Text(
-                                    'Create New Account',
-                                    style: TextStyle(
-                                        color: Colors.white, fontSize: 18),
-                                  ),
+                            onPressed: () async {
+                              if (_formKey.currentState!.validate()) {
+                                await _authService.fullSignUp(
+                                  context: context,
+                                  age: int.parse(_ageController.text),
+                                  email: _emailController.text.trim(),
+                                  formKey: _formKey,
+                                  isLoading: _isLoading,
+                                  name: _usernameController.text,
+                                  password:
+                                  _passwordController.text.trim(),
+                                  phoneNumber:
+                                  _phonenumberController.text,
                                 );
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                              minimumSize:
+                              const Size(double.infinity, 50),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: const Text(
+                              'Create New Account',
+                              style: TextStyle(
+                                  color: Colors.white, fontSize: 18),
+                            ),
+                          );
                         },
                       ),
                       TextButton(
