@@ -1,9 +1,11 @@
 import 'dart:io';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 
 class MediaHandler {
   final ImagePicker _picker = ImagePicker();
   final List<File> images = [];
+
   // Pick multiple images from the gallery
   Future<List<File>> pickMultipleImages() async {
     final List<XFile>? images = await _picker.pickMultiImage();
@@ -17,6 +19,7 @@ class MediaHandler {
   Future<File?> pickSingleImage(ImageSource source) async {
     final XFile? image = await _picker.pickImage(source: source);
     if (image != null) {
+      print('${image?.path}');
       return File(image.path);
     }
     return null;
@@ -26,6 +29,7 @@ class MediaHandler {
   Future<File?> pickVideo(ImageSource source) async {
     final XFile? video = await _picker.pickVideo(source: source);
     if (video != null) {
+      print('${video?.path}');
       return File(video.path);
     }
     return null;
@@ -34,11 +38,11 @@ class MediaHandler {
   // Capture multiple images using the camera
   Future<List<File>> captureMultipleImages(Future<bool> Function() promptForNextCapture) async {
     bool continueCapturing = true;
-
     while (continueCapturing) {
       final XFile? image = await _picker.pickImage(source: ImageSource.camera);
       if (image != null) {
         images.add(File(image.path));
+        print('${image?.path}');
       }
 
       // Ask the user if they want to capture another image
@@ -47,4 +51,7 @@ class MediaHandler {
 
     return images;
   }
+
+
+
 }

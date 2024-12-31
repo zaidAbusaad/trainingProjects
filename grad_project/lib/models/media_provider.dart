@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import '../components/media_handler.dart';
-
 import 'package:video_player/video_player.dart';
 
 class MediaProvider with ChangeNotifier {
@@ -66,8 +66,7 @@ class MediaProvider with ChangeNotifier {
           ),
         ],
       ),
-    ) ??
-        false;
+    ) ?? false;
   }
 
   @override

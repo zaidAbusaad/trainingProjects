@@ -1,8 +1,10 @@
 import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import '../firebase_functions/database_service.dart';
 import '../models/media_provider.dart';
 import '../models/request_model.dart';
 import '../models/service_card_model.dart';
@@ -186,28 +188,57 @@ class RequestScreen extends StatelessWidget {
               bottom: 10,
               child:  ElevatedButton(
                 onPressed: () async {
+                  String? userId = FirebaseAuth.instance.currentUser?.uid;
                   // Collect data from user inputs
                   final request = RequestModel(
                     title: titleController.text,
                     description: descriptionController.text,
-
-                    images: mediaProvider.selectedImages,
+                    location: globalLastTappedLocation!,
+                    images: mediaProvider.selectedImages ?? [],
                     video: mediaProvider.selectedVideo,
                   );
+                  // Upload images to Firebase Storage
+                  List<String> imageUrls = [];
+                  for (var image in mediaProvider.selectedImages ?? []) {
+                    // Ensure that image is a File type
+                    if (image is File) {
+                      String imageUrl = await DatabaseService(uid: userId).uploadMediaToStorage(image, 'image');
+                      if (imageUrl.isNotEmpty) {
+                        imageUrls.add(imageUrl);
+                      }
+                    }
+                  }
+                  // Upload video to Firebase Storage (if exists)
+                  String videoUrl = '';
+                  if (mediaProvider.selectedVideo != null && mediaProvider.selectedVideo is File) {
+                    videoUrl = await DatabaseService(uid: userId).uploadMediaToStorage(mediaProvider.selectedVideo!, 'video');
+                  }
+                  // Call DatabaseService to save request data, passing the signed-in user ID
+                  // After uploading the media, save the request data to Firestore
+                  if (userId != null) {
+                    DatabaseService(uid: userId).saveRequestData(
+                      title: request.title ?? '',
+                      description: request.description ?? '',
+                      location: request.location!,
+                      images: imageUrls, // Use the uploaded image URLs
+                      video: videoUrl, // Use the uploaded video URL
+                    );
 
-                  // Save request to Firebase
-                  await request.saveToFirebase();
+                    // Provide feedback to the user
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Request submitted successfully!")),
+                    );
 
-                  // Provide feedback to the user
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Request submitted successfully!")),
-                  );
-
-                  Navigator.pop(context); // Return to the previous screen
+                    Navigator.pop(context); // Return to the previous screen
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("User not logged in")),
+                    );
+                  }
                 },
                 child: const Text('Submit'),
               ),
-            ),
+            )
           ],
         ),
       ),

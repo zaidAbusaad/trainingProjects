@@ -169,8 +169,16 @@ class _MapPageState extends State<MapPage> {
                 } else if (_currentPosition != null) {
                   globalLastTappedLocation = _currentPosition;
                 }
-                RequestModel(location:globalLastTappedLocation );
-                Navigator.pop(context); // Pass back the location
+                if (globalLastTappedLocation != null) {
+                  RequestModel request = RequestModel(location: globalLastTappedLocation);
+                  // Call your method to save the request to Firestore
+                  // e.g., databaseService.saveRequest(request);
+                  Navigator.pop(context); // Go back to the previous screen
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Please select a valid location")),
+                  );
+                }
               },
               child: Text('Save Location'),
             ),
@@ -269,16 +277,5 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
-  Future<void> _saveTappedLocation(LatLng location) async {
-    try {
-      await FirebaseFirestore.instance.collection("locations").add({
-        "latitude": location.latitude,
-        "longitude": location.longitude,
-        "timestamp": Timestamp.now(),
-      });
-      print("Tapped Location Saved to Firebase: ${location.latitude}, ${location.longitude}");
-    } catch (e) {
-      print("Failed to save tapped location: $e");
-    }
-  }
+
 }
