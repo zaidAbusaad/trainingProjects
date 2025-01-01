@@ -11,9 +11,7 @@ import '../models/service_card_model.dart';
 import '../components/cutom_shapes/circular_container.dart';
 import '../components/cutom_shapes/curved_edges.dart';
 import 'package:video_player/video_player.dart';
-
 import 'map_page.dart';
-
 
 class RequestScreen extends StatelessWidget {
   const RequestScreen({super.key, required this.field});
@@ -105,11 +103,11 @@ class RequestScreen extends StatelessWidget {
             ),
             // Description Field
             Padding(
-              padding: EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(8.0),
               child: TextField(
                 controller: descriptionController,
                 maxLines: 4,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Provide a detailed description of the problem',
                   border: OutlineInputBorder(),
                 ),
@@ -148,9 +146,9 @@ class RequestScreen extends StatelessWidget {
               ),
             ),
             const Divider(),
-            // Display Selected Images
+            // Display Selected Media
             if ((mediaProvider.selectedImages != null &&
-                    mediaProvider.selectedImages!.isNotEmpty) ||
+                mediaProvider.selectedImages!.isNotEmpty) ||
                 (mediaProvider.controller != null &&
                     mediaProvider.controller!.value.isInitialized))
               Padding(
@@ -164,7 +162,7 @@ class RequestScreen extends StatelessWidget {
                         mediaProvider.selectedImages!.isNotEmpty)
                       ...mediaProvider.selectedImages!
                           .map((image) =>
-                              Image.file(image, width: 100, height: 100))
+                          Image.file(image, width: 100, height: 100))
                           .toList(),
                     // Display Video
                     if (mediaProvider.controller != null &&
@@ -174,71 +172,117 @@ class RequestScreen extends StatelessWidget {
                         height: 100,
                         child: AspectRatio(
                           aspectRatio:
-                              mediaProvider.controller!.value.aspectRatio,
+                          mediaProvider.controller!.value.aspectRatio,
                           child: VideoPlayer(mediaProvider.controller!),
                         ),
                       ),
                   ],
                 ),
               ),
-
-            Positioned(
-
-              right: 10,
-              bottom: 10,
-              child:  ElevatedButton(
-                onPressed: () async {
-                  String? userId = FirebaseAuth.instance.currentUser?.uid;
-                  // Collect data from user inputs
-                  final request = RequestModel(
-                    title: titleController.text,
-                    description: descriptionController.text,
-                    location: globalLastTappedLocation!,
-                    images: mediaProvider.selectedImages ?? [],
-                    video: mediaProvider.selectedVideo,
+            ElevatedButton(
+              onPressed: () async {
+                String? userId = FirebaseAuth.instance.currentUser?.uid;
+                if (userId == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("User not logged in")),
                   );
-                  // Upload images to Firebase Storage
-                  List<String> imageUrls = [];
-                  for (var image in mediaProvider.selectedImages ?? []) {
-                    // Ensure that image is a File type
-                    if (image is File) {
-                      String imageUrl = await DatabaseService(uid: userId).uploadMediaToStorage(image, 'image');
+                  return;
+                }
+                // Use the new DatabaseService methods
+                List<Map<String, dynamic>> mediaList = [];
+                if (mediaProvider.selectedImages != null) {
+                  mediaList.addAll(mediaProvider.selectedImages!
+                      .map((file) => {"type": "image", "file": file, "priority": "1",}));
+                }
+                if (mediaProvider.selectedVideo != null) {
+                  mediaList.add({
+                    "type": "video",
+                    "file": mediaProvider.selectedVideo!,
+                    "priority": "2",
+                  });
+                }
+                final dbService = DatabaseService(uid: userId);
+                // Collect data from user inputs
+                String title = titleController.text.trim();
+                String description = descriptionController.text.trim();
+                String uid = userId;
+                // Validate inputs
+                if (title.isEmpty || description.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Title and description cannot be empty")),
+                  );
+                  return;
+                }
+
+                // Collect location and media
+                LatLng? selectedLocation = globalLastTappedLocation;
+                if (selectedLocation == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Please select a location")),
+                  );
+                  return;
+                }
+                List<String> imageUrls = [];
+                String videoUrl = '';
+
+                // Upload media and save request
+                try {
+                  // Upload images
+                  if (mediaProvider.selectedImages != null) {
+                    for (var image in mediaProvider.selectedImages!) {
+                      String imageUrl = await dbService.uploadMediaToStorage(
+                        image,
+                          'Users/$userId/Images',
+                      );
                       if (imageUrl.isNotEmpty) {
                         imageUrls.add(imageUrl);
                       }
                     }
                   }
-                  // Upload video to Firebase Storage (if exists)
-                  String videoUrl = '';
-                  if (mediaProvider.selectedVideo != null && mediaProvider.selectedVideo is File) {
-                    videoUrl = await DatabaseService(uid: userId).uploadMediaToStorage(mediaProvider.selectedVideo!, 'video');
-                  }
-                  // Call DatabaseService to save request data, passing the signed-in user ID
-                  // After uploading the media, save the request data to Firestore
-                  if (userId != null) {
-                    DatabaseService(uid: userId).saveRequestData(
-                      title: request.title ?? '',
-                      description: request.description ?? '',
-                      location: request.location!,
-                      images: imageUrls, // Use the uploaded image URLs
-                      video: videoUrl, // Use the uploaded video URL
-                    );
 
-                    // Provide feedback to the user
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Request submitted successfully!")),
-                    );
-
-                    Navigator.pop(context); // Return to the previous screen
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("User not logged in")),
+                  // Upload video
+                  if (mediaProvider.selectedVideo != null) {
+                    videoUrl = await dbService.uploadMediaToStorage(
+                      mediaProvider.selectedVideo!,
+                      'Users/$userId/Videos',
                     );
                   }
-                },
-                child: const Text('Submit'),
-              ),
-            )
+
+                  // Save request data to Firestore
+                  await dbService.saveRequestData(
+                    title: title,
+                    description: description,
+                    location: selectedLocation!,
+                    images: imageUrls,
+                    video: videoUrl,
+                    status: false
+                  );
+
+                  await dbService.saveRequestData_request(
+                    title: title,
+                    description: description,
+                    location: selectedLocation!,
+                    images: imageUrls,
+                    video: videoUrl,
+                    service: '',
+                    userId: uid,
+                    status: false,
+
+                  );
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Request submitted successfully!")),
+                  );
+
+                  Navigator.pop(context); // Return to the previous screen
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Failed to upload: $e")),
+                  );
+                }
+              },
+              child: const Text('Submit'),
+            ),
           ],
         ),
       ),

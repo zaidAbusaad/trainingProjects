@@ -22,6 +22,7 @@ void main() async {
     create: (context) => MediaProvider(),
     child: MyApp(),
   ),);
+
 }
 
 class MyApp extends StatelessWidget {
@@ -36,6 +37,7 @@ class MyApp extends StatelessWidget {
       ],
       child:  const MaterialApp(
         debugShowCheckedModeBanner: false,
+
         home:  LogInScreen(),
         ),
 
