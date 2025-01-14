@@ -2,6 +2,10 @@ import 'package:ecommerceapp/components/size_grid_model.dart';
 import 'package:ecommerceapp/list_cubit/product_cubit.dart';
 import 'package:ecommerceapp/models/item_model.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../models/user.dart';
+import '../services/database.dart';
 
 class ItemScreen extends StatelessWidget {
   const ItemScreen({super.key, required this.item});
@@ -9,6 +13,9 @@ class ItemScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = Provider.of<AppUser?>(context);
+    final userId = user?.uid; // This is your user's ID to store the item in Firestore
+
     ProductCubit cubit = ProductCubit.get(context);
     return Scaffold(
       appBar: AppBar(
@@ -106,7 +113,7 @@ class ItemScreen extends StatelessWidget {
                     style:
                     const TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
                   )),
-              SizeGrid(),
+              const SizeGrid(),
 
               Container(
                   margin: const EdgeInsets.symmetric(horizontal: 15),
@@ -123,16 +130,27 @@ class ItemScreen extends StatelessWidget {
                 margin: const EdgeInsets.all(15),
                 child: Row(
                   children: [
-                    Container(
+                    SizedBox(
                       height: 75,
                       width: 150,
-                      child: FloatingActionButton(onPressed: (){
+                      child: FloatingActionButton(
+                        onPressed: () {
+                          final userId = user?.uid; // Get the user's ID from the provider
+                          if (userId != null) {
+                            DatabaseService(uid: userId).addProductToCart(userId, item);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('${item.itemName} added to cart')),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Please log in to add items to your cart')),
+                            );
+                          }
+                        },
+                        child: const Text('Add To Cart'),
+                      ),
+                ),
 
-
-                        cubit.addItem(item);
-                      },
-                          child: const Text('Add To Cart')),
-                    ),
                   ],
                 ),
               )
@@ -143,3 +161,5 @@ class ItemScreen extends StatelessWidget {
     );
   }
 }
+
+

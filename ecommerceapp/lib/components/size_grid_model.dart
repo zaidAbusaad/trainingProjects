@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 
 
 class SizeGrid extends StatefulWidget {
+  const SizeGrid({super.key});
+
   @override
   _SizeGridState createState() => _SizeGridState();
 }

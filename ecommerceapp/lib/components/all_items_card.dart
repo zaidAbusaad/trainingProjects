@@ -11,7 +11,7 @@ class AllItemsCard extends StatelessWidget {
     return  Padding(
       padding: const EdgeInsets.all(8.0),
       child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 8),
+        margin: const EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           color: Colors.white,
@@ -38,14 +38,14 @@ class AllItemsCard extends StatelessWidget {
               ),
               Text(items.itemName),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 3),
-                margin: EdgeInsets.all(8.0),
+                padding: const EdgeInsets.symmetric(horizontal: 3),
+                margin: const EdgeInsets.all(8.0),
                 decoration: BoxDecoration(
                   color: Colors.grey[350],
                   border: Border.all(color: Colors.grey),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Text(
+                child: const Text(
                   '7 colors',
                   style: TextStyle(color: Colors.grey),
                 ),
@@ -57,11 +57,11 @@ class AllItemsCard extends StatelessWidget {
                     flex: 1,
                   ),
                   Container(
-                      padding: EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                           color: Colors.grey[100],
                           borderRadius: BorderRadius.circular(10)),
-                      child: Icon(Icons.add)),
+                      child: const Icon(Icons.add)),
                 ],
               )
             ],

@@ -1,16 +1,17 @@
-import 'package:ecommerceapp/list_cubit/product_cubit.dart';
-import 'package:ecommerceapp/list_cubit/product_state.dart';
-import 'package:ecommerceapp/models/item_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
+import '../models/item_model.dart';
+import '../models/user.dart';
+import '../services/database.dart';
 
 class CartItem extends StatelessWidget {
-  const CartItem({super.key, required this.item});
+  const CartItem({super.key, required this.items});
+  final ItemModel items;
 
-  final ItemModel item;
   @override
   Widget build(BuildContext context) {
-    ProductCubit cubit = ProductCubit.get(context);
+    final user = Provider.of<AppUser?>(context);
+    final userId = user?.uid;
 
     return Container(
       decoration: BoxDecoration(
@@ -21,24 +22,18 @@ class CartItem extends StatelessWidget {
           SizedBox(
             height: 125,
             width: 120,
-            child: Image.asset(
-              item.imageUrl,
-            ),
+            child: Image.asset(items.imageUrl),
           ),
           Expanded(
             child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(item.itemName),
+                  Text(items.itemName, style: Theme.of(context).textTheme.bodyLarge),
                   const Text('The size'),
-                  const SizedBox(
-                    height: 20,
-                  ),
+                  const SizedBox(height: 20),
                   Row(
-
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
@@ -46,52 +41,79 @@ class CartItem extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                             '\$${ item.price}',
+                              '\$${items.price}',
+                              style: Theme.of(context).textTheme.titleMedium,
                             ),
-                            BlocBuilder<ProductCubit,ProductStates>(
-
-                              builder: (context,state) {
-                                return Text('Total: \$${item.price * item.qty}');
-                              }
+                            Text(
+                              'Total: \$${items.price * items.qty}',
+                              style: Theme.of(context).textTheme.titleSmall,
                             ),
                           ],
                         ),
                       ),
-                      Row(
-                        children: [
-                          IconButton(
-                            onPressed: () {
-                              cubit.decrement(item);
-                            },
-                            icon:  BlocBuilder<ProductCubit,ProductStates>(
-                              builder: (context,state) {
-                                return Icon(item.qty==1 ? Icons.delete_outline : Icons.remove);
-                              }
-                            ),
-                          ),
-                           BlocBuilder<ProductCubit,ProductStates>(
-                             builder: (context,state) {
-                               return Text(
-                                 item.qty.toString(),
-                                                         );
-                             }
-                           ),
-                          IconButton(
-                            onPressed: () {
-                              cubit.increment(item);
-                            },
-                            icon:  const Icon(Icons.add),
-                          ),
-                        ],
+                      _QuantityAdjuster(
+                        item: items,
+                        userId: userId,
                       ),
                     ],
                   )
                 ],
               ),
             ),
-          )
+          ),
         ],
       ),
+    );
+  }
+}
+
+class _QuantityAdjuster extends StatelessWidget {
+  const _QuantityAdjuster({
+    required this.item,
+    required this.userId,
+  });
+
+  final ItemModel item;
+  final String? userId;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        IconButton(
+          onPressed: () {
+            if (userId != null) {
+              if (item.qty > 1) {
+                // Decrease quantity by 1 in Firebase
+                DatabaseService(uid: userId).updateProductQuantity(userId!, item, -1);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('${item.itemName} quantity decreased')),
+                );
+              } else {
+                // Remove the item if qty is 1
+                DatabaseService(uid: userId).removeProductFromCart(userId!, item);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('${item.itemName} removed from cart')),
+                );
+              }
+            }
+          },
+          icon: Icon(item.qty == 1 ? Icons.delete_outline : Icons.remove),
+        ),
+        Text('${item.qty}', style: Theme.of(context).textTheme.bodyLarge),
+        IconButton(
+          onPressed: () {
+            if (userId != null) {
+              // Increase quantity by 1 in Firebase
+              DatabaseService(uid: userId).updateProductQuantity(userId!, item, 1);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('${item.itemName} quantity increased')),
+              );
+            }
+          },
+          icon: const Icon(Icons.add),
+        ),
+      ],
     );
   }
 }
