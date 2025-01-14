@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import '../components/textfield.dart';
+import 'package:grad_project/components/cutom_shapes/toggle_button.dart';
+
+import '../components/cutom_shapes/textfield.dart';
 import '../firebase_functions/auth_service.dart';
+import '../screensWorkers/sign_up_screen2.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -39,7 +42,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(height: 50),
+              const SizedBox(height: 70),
               const Text(
                 'Handy',
                 style: TextStyle(
@@ -47,7 +50,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     fontSize: 25,
                     fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 35),
+              SizedBox(
+                height: 30,
+              ),
+              ToggleButton(
+                isCustomerSelected: true,
+                onCustomerSelected: () {},
+                onWorkerSelected: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => SignUpScreen2()),
+                  );
+                },),
+              const SizedBox(height: 15),
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 20),
                 child: Form(
@@ -118,6 +133,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           );
                         },
                       ),
+                      Divider(),
                       TextButton(
                         onPressed: () {
                           Navigator.pop(context);

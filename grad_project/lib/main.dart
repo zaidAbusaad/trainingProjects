@@ -4,11 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:grad_project/home_cubit/home_cubit.dart';
 import 'package:grad_project/layout_cubit/layout_cubit.dart';
-import 'package:grad_project/screens/home_screen.dart';
-import 'package:grad_project/screens/layout_screen.dart';
+
 import 'package:grad_project/screens/log_in_screen.dart';
-import 'package:grad_project/screens/map_page.dart';
-import 'package:grad_project/screens2/home_screen_employee.dart';
 import 'package:provider/provider.dart';
 
 import 'models/media_provider.dart';

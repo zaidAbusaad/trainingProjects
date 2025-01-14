@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:grad_project/models/service_card_model.dart';
-import 'package:grad_project/screens/request_screen.dart';
+import 'package:grad_project/screensWorkers/requests_screen_worker.dart';
+
+
+import '../screensCutomers/request_screen.dart';
 
 class ServiceCard extends StatelessWidget {
-  const ServiceCard({super.key, required this.field});
+  const ServiceCard({super.key, required this.field, required this.isWorker});
+  final bool isWorker;
 
   final ServiceCardModel field;
 
@@ -14,10 +18,18 @@ class ServiceCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => RequestScreen(field: field,)),
-        );
+
+        if(isWorker){
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => RequestsScreenWorker(field: field,)),
+          );
+        }else{
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => RequestScreen(field: field,)),
+          );
+        }
       },
       child: Padding(
         padding: const EdgeInsets.all(8.0),

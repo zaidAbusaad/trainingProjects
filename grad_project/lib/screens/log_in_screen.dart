@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:grad_project/screens/sign_up_screen.dart';
 
-import 'layout_screen.dart';
+import 'package:grad_project/screensCutomers/sign_up_screen.dart';
+
+import '../screensWorkers/layout_screen_wroker.dart';
+import '../screensCutomers/layout_screen.dart'; // Replace with HomeScreen for customers
+
 
 class LogInScreen extends StatefulWidget {
   const LogInScreen({super.key});
@@ -23,21 +25,55 @@ class _LogInScreenState extends State<LogInScreen> {
   String _statusMessage = '';
 
   Future<void> _login() async {
-
     try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      // Sign in the user with Firebase Auth
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
         email: _usernameController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      setState(() {
-        _isLoading = true;
-      });
-      // Login success, navigate to home screen
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => const LayoutScreen()));
+
+      // Get the current user's UID
+      String uid = userCredential.user!.uid;
+
+      // Check if the user exists in the `customers` collection
+      DocumentSnapshot customerDoc =
+      await _firestore.collection('Customers').doc(uid).get();
+
+      if (customerDoc.exists) {
+        // Navigate to HomeScreen for customers
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LayoutScreen()),
+        );
+      } else {
+        // Check if the user exists in the `workers` collection
+        DocumentSnapshot workerDoc =
+        await _firestore.collection('workers').doc(uid).get();
+
+        if (workerDoc.exists) {
+          // Navigate to HomeScreenWorker for workers
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const LayoutScreenWorker()),
+          );
+        } else {
+          // If the user doesn't exist in either collection
+          setState(() {
+            _statusMessage = 'User not found in the system.';
+          });
+        }
+      }
     } on FirebaseAuthException catch (e) {
       setState(() {
         _statusMessage = e.message ?? 'Unknown error occurred';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
       });
     }
   }
@@ -46,7 +82,6 @@ class _LogInScreenState extends State<LogInScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-      
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -57,7 +92,11 @@ class _LogInScreenState extends State<LogInScreen> {
               const Text(
                 'Handy',
                 style: TextStyle(
-                    color: Color(0xFFFFDB58), fontSize: 30, fontWeight: FontWeight.bold,fontStyle: FontStyle.italic),
+                  color: Color(0xFFFFDB58),
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                  fontStyle: FontStyle.italic,
+                ),
               ),
               const SizedBox(
                 height: 35,
@@ -78,7 +117,9 @@ class _LogInScreenState extends State<LogInScreen> {
                       ),
                       child: TextField(
                         controller: _usernameController,
-                        decoration: const InputDecoration.collapsed(hintText: 'Email'),
+                        decoration: const InputDecoration.collapsed(
+                          hintText: 'Email',
+                        ),
                       ),
                     ),
                     Container(
@@ -89,30 +130,40 @@ class _LogInScreenState extends State<LogInScreen> {
                       ),
                       child: TextField(
                         controller: _passwordController,
-                        decoration: const InputDecoration.collapsed(hintText: 'Password'),
-                        obscureText: true, // To hide the password input
+                        decoration: const InputDecoration.collapsed(
+                          hintText: 'Password',
+                        ),
+                        obscureText: true,
                       ),
                     ),
                     _isLoading
                         ? const CircularProgressIndicator()
-                    :Container(
+                        : Container(
                       margin: const EdgeInsets.symmetric(vertical: 25),
                       width: double.infinity,
                       child: ElevatedButton(
-                        // Use ElevatedButton instead of FloatingActionButton
-                        onPressed: () {
-                          _login(); // Call the _login method
-                        },
+                        onPressed: _login,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFFFDB58),
                           padding: const EdgeInsets.symmetric(vertical: 15),
                         ),
                         child: const Text(
                           'Log In',
-                          style: TextStyle(color: Colors.white, fontSize: 18),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                          ),
                         ),
                       ),
                     ),
+                    if (_statusMessage.isNotEmpty)
+                      Text(
+                        _statusMessage,
+                        style: const TextStyle(
+                          color: Colors.red,
+                          fontSize: 14,
+                        ),
+                      ),
                     GestureDetector(
                       child: const Text(
                         'Forgotten password?',
@@ -122,18 +173,20 @@ class _LogInScreenState extends State<LogInScreen> {
                     Row(
                       children: [
                         const Expanded(
-                            child: Divider(
-                              color: Colors.black,
-                            )),
+                          child: Divider(
+                            color: Colors.black,
+                          ),
+                        ),
                         Container(
                           margin: const EdgeInsets.symmetric(
                               horizontal: 5, vertical: 10),
                           child: const Text("or"),
                         ),
                         const Expanded(
-                            child: Divider(
-                              color: Colors.black,
-                            )),
+                          child: Divider(
+                            color: Colors.black,
+                          ),
+                        ),
                       ],
                     ),
                     Container(

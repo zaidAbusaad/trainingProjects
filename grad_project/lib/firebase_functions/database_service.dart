@@ -31,6 +31,7 @@ class DatabaseService {
     required List<String> images,
     required String  video,
     required bool status,
+    required String field
   }) async {
     try {
       // Check if uid is not null before proceeding
@@ -49,7 +50,8 @@ class DatabaseService {
           'images': images,
           'video': video,
           'createdAt': FieldValue.serverTimestamp(),
-          'status':status
+          'status':status,
+          'field':field
         });
 
         print("Request data saved successfully under user $uid!");
@@ -70,7 +72,7 @@ class DatabaseService {
     required List<String> images,
     required String  video,
     required String userId,
-    required bool status,
+    required bool status, required String field,
   }) async {
     try {
       // Check if uid is not null before proceeding
@@ -91,7 +93,8 @@ class DatabaseService {
           'createdAt': FieldValue.serverTimestamp(),
           'userId': uid,
           'service': service,
-          'status':status
+          'status':status,
+          'field':field,
 
 
         });

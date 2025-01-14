@@ -77,7 +77,7 @@ class RequestScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Text(
-                'In need of an ${field.fieldName}!',
+                'In need of an ${field.profession}!',
                 style: const TextStyle(
                   color: Colors.black,
                   fontSize: 25,
@@ -252,21 +252,23 @@ class RequestScreen extends StatelessWidget {
                   await dbService.saveRequestData(
                     title: title,
                     description: description,
-                    location: selectedLocation!,
+                    location: selectedLocation,
                     images: imageUrls,
                     video: videoUrl,
-                    status: false
+                    status: false,
+                    field: field.fieldName
                   );
 
                   await dbService.saveRequestData_request(
                     title: title,
                     description: description,
-                    location: selectedLocation!,
+                    location: selectedLocation,
                     images: imageUrls,
                     video: videoUrl,
                     service: '',
                     userId: uid,
                     status: false,
+                    field : field.fieldName
 
                   );
 

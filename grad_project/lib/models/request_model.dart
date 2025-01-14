@@ -6,11 +6,13 @@ import 'package:firebase_storage/firebase_storage.dart';
 class RequestModel {
   final String? title; // Request title
   final String? description; // Detailed description
-  final LatLng ? location; // Latitude and longitude
+  final LatLng? location; // Latitude and longitude
   final List<File>? images; // List of selected image files
-  final File? video; // Selected video file
+  final File? video;
+  final String? field; // Selected video file
 
   RequestModel({
+    this.field,
     this.title,
     this.description,
     this.location,
@@ -28,8 +30,7 @@ class RequestModel {
           : null,
       'images': images ?? [], // Store image URLs
       'video': video ?? '', // Store video URL
+      'field': field,
     };
   }
-
-
 }
