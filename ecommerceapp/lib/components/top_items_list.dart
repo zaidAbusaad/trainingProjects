@@ -1,6 +1,5 @@
 import 'package:ecommerceapp/components/top_item_card.dart';
 import 'package:flutter/material.dart';
-import '../models/item_model.dart';
 import '../list_cubit/product_cubit.dart';
 class TopItemsList extends StatelessWidget {
   const TopItemsList({super.key});

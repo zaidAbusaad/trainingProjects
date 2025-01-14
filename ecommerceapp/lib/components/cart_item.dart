@@ -28,12 +28,12 @@ class CartItem extends StatelessWidget {
           Expanded(
             child: Padding(
               padding:
-              const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(item.itemName),
-                  Text('Size: ${item.size}'),
+                  const Text('The size'),
                   const SizedBox(
                     height: 20,
                   ),
@@ -46,13 +46,13 @@ class CartItem extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '\$${ item.price}',
+                             '\$${ item.price}',
                             ),
                             BlocBuilder<ProductCubit,ProductStates>(
 
-                                builder: (context,state) {
-                                  return Text('Total: \$${item.price * item.qty}');
-                                }
+                              builder: (context,state) {
+                                return Text('Total: \$${item.price * item.qty}');
+                              }
                             ),
                           ],
                         ),
@@ -64,18 +64,18 @@ class CartItem extends StatelessWidget {
                               cubit.decrement(item);
                             },
                             icon:  BlocBuilder<ProductCubit,ProductStates>(
-                                builder: (context,state) {
-                                  return Icon(item.qty==1 ? Icons.delete_outline : Icons.remove);
-                                }
+                              builder: (context,state) {
+                                return Icon(item.qty==1 ? Icons.delete_outline : Icons.remove);
+                              }
                             ),
                           ),
-                          BlocBuilder<ProductCubit,ProductStates>(
-                              builder: (context,state) {
-                                return Text(
-                                  item.qty.toString(),
-                                );
-                              }
-                          ),
+                           BlocBuilder<ProductCubit,ProductStates>(
+                             builder: (context,state) {
+                               return Text(
+                                 item.qty.toString(),
+                                                         );
+                             }
+                           ),
                           IconButton(
                             onPressed: () {
                               cubit.increment(item);
