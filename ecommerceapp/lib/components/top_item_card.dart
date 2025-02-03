@@ -1,8 +1,11 @@
 import 'package:ecommerceapp/models/item_model.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../list_cubit/product_cubit.dart';
+import '../models/user.dart';
 import '../screens/item_screen.dart';
+import '../services/database.dart';
 
 class TopItemCard extends StatelessWidget {
   const TopItemCard({super.key, required this.items});
@@ -12,6 +15,8 @@ class TopItemCard extends StatelessWidget {
 
   Widget build(BuildContext context) {
     ProductCubit cubit=ProductCubit.get(context);
+    final user = Provider.of<AppUser?>(context);
+    final userId = user?.uid;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: Center(
@@ -58,12 +63,21 @@ class TopItemCard extends StatelessWidget {
                         children: [
                            Text(items.itemName),
                            Text('\$${items.price}'),
-                          Container(
+                          SizedBox(
                             height: 50,
                             width: 100,
                             child: FloatingActionButton(
                               onPressed: () {
-                                cubit.addItem(items);
+                                if (userId != null) {
+                                  DatabaseService(uid: userId).addProductToCart(userId!, items);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('${items.itemName} added to cart')),
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Please log in to add items to your cart')),
+                                  );
+                                }
                               },
                               backgroundColor: Colors.black,
                               child: const Row(

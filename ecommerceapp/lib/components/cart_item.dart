@@ -1,13 +1,15 @@
 import 'package:ecommerceapp/list_cubit/product_cubit.dart';
 import 'package:ecommerceapp/list_cubit/product_state.dart';
-import 'package:ecommerceapp/models/item_model.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class CartItem extends StatelessWidget {
-  const CartItem({super.key, required this.item});
+import '../models/item_model.dart';
 
-  final ItemModel item;
+class CartItem extends StatelessWidget {
+  const CartItem({super.key, required this.items});
+
+  final ItemModel items;
   @override
   Widget build(BuildContext context) {
     ProductCubit cubit = ProductCubit.get(context);
@@ -22,7 +24,7 @@ class CartItem extends StatelessWidget {
             height: 125,
             width: 120,
             child: Image.asset(
-              item.imageUrl,
+              items.imageUrl,
             ),
           ),
           Expanded(
@@ -32,7 +34,7 @@ class CartItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(item.itemName),
+                  Text(items.itemName),
                   const Text('The size'),
                   const SizedBox(
                     height: 20,
@@ -46,12 +48,12 @@ class CartItem extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                             '\$${ item.price}',
+                             '\$${ items.price}',
                             ),
                             BlocBuilder<ProductCubit,ProductStates>(
 
                               builder: (context,state) {
-                                return Text('Total: \$${item.price * item.qty}');
+                                return Text('Total: \$${items.price * items.qty}');
                               }
                             ),
                           ],
@@ -61,24 +63,24 @@ class CartItem extends StatelessWidget {
                         children: [
                           IconButton(
                             onPressed: () {
-                              cubit.decrement(item);
+                              cubit.decrement(items);
                             },
                             icon:  BlocBuilder<ProductCubit,ProductStates>(
                               builder: (context,state) {
-                                return Icon(item.qty==1 ? Icons.delete_outline : Icons.remove);
+                                return Icon(items.qty==1 ? Icons.delete_outline : Icons.remove);
                               }
                             ),
                           ),
                            BlocBuilder<ProductCubit,ProductStates>(
                              builder: (context,state) {
                                return Text(
-                                 item.qty.toString(),
+                                 items.qty.toString(),
                                                          );
                              }
                            ),
                           IconButton(
                             onPressed: () {
-                              cubit.increment(item);
+                              cubit.increment(items);
                             },
                             icon:  const Icon(Icons.add),
                           ),

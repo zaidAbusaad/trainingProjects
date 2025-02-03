@@ -4,6 +4,10 @@ import 'package:ecommerceapp/models/item_model.dart';
 import 'package:ecommerceapp/screens/item_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
+
+import '../models/user.dart';
+import '../services/database.dart';
 
 class ItemCard extends StatelessWidget {
   const ItemCard({super.key, required this.items});
@@ -13,6 +17,8 @@ class ItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cubit = ProductCubit.get(context);
+    final user = Provider.of<AppUser?>(context);
+    final userId = user?.uid;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8),
       height: 280,
@@ -99,9 +105,18 @@ class ItemCard extends StatelessWidget {
                   child: IconButton(
                     padding: EdgeInsets.zero,
                     onPressed: () {
-                      cubit.addItem(items);
+                      if (userId != null) {
+                        DatabaseService(uid: userId).addProductToCart(userId!, items);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('${items.itemName} added to cart')),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Please log in to add items to your cart')),
+                        );
+                      }
                     },
-                    icon: Icon(Icons.add),
+                    icon: const Icon(Icons.add),
                   ),
                 ),
               ],

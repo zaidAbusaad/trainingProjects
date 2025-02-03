@@ -40,7 +40,7 @@ class HomePage extends StatelessWidget {
                       ),
                       Padding(
                         padding: const EdgeInsets.only(right: 15.0),
-                        child: Container(
+                        child: SizedBox(
                           height: 40,
                           width: 85,
                           child: FloatingActionButton(
@@ -63,7 +63,7 @@ class HomePage extends StatelessWidget {
                     ],
                   ),
                 ),
-                 ItemList(),
+                 const ItemList(),
               ],
             ),
           ),

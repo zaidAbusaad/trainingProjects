@@ -16,8 +16,8 @@ class CategoriesList extends StatelessWidget {
             child: Column(
               children: [
                 FloatingActionButton(
-                    onPressed: () {}, child: Icon(Icons.category)),
-                Text('Category')
+                    onPressed: () {}, child: const Icon(Icons.category)),
+                const Text('Category')
               ],
             ),
           ),
@@ -27,9 +27,9 @@ class CategoriesList extends StatelessWidget {
               children: [
                 FloatingActionButton(
                   onPressed: () {},
-                  child: Icon(Icons.compare),
+                  child: const Icon(Icons.compare),
                 ),
-                Text('Compare')
+                const Text('Compare')
               ],
             ),),
 
@@ -38,10 +38,10 @@ class CategoriesList extends StatelessWidget {
             child: Column(
               children: [
                 FloatingActionButton(
-                  onPressed: () {},backgroundColor: Color(0xFFF3CFE8),
-                  child: Icon(Icons.discount_outlined),
+                  onPressed: () {},backgroundColor: const Color(0xFFF3CFE8),
+                  child: const Icon(Icons.discount_outlined),
                 ),
-                Text('Sales event')
+                const Text('Sales event')
               ],
             ),
           ),
@@ -51,11 +51,11 @@ class CategoriesList extends StatelessWidget {
             child: Column(
               children: [
                 FloatingActionButton(
-                  onPressed: () {},backgroundColor: Color(0XFFFED18C),
-                  child: Icon(Icons.attach_money,color: Colors.deepOrange,),
+                  onPressed: () {},backgroundColor: const Color(0XFFFED18C),
+                  child: const Icon(Icons.attach_money,color: Colors.deepOrange,),
                 ),
 
-                Text('Offers')
+                const Text('Offers')
               ],
             ),
           ),
