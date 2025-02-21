@@ -1,293 +1,300 @@
-import 'dart:io';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:grad_project/firebase_functions/media_handler.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import '../firebase_functions/database_service.dart';
-import '../models/media_provider.dart';
-import '../models/request_model.dart';
-import '../models/service_card_model.dart';
+import 'package:video_player/video_player.dart';
 import '../components/cutom_shapes/circular_container.dart';
 import '../components/cutom_shapes/curved_edges.dart';
-import 'package:video_player/video_player.dart';
-import 'map_page.dart';
+import '../firebase_functions/request_service.dart';
+import '../state_management/providers/media_provider.dart';
+import '../models/service_card_model.dart';
+import 'map_page.dart'; // Ensure you import MediaProvider
 
 class RequestScreen extends StatelessWidget {
-  const RequestScreen({super.key, required this.field});
+  RequestScreen({super.key, required this.field});
 
   final ServiceCardModel field;
+
+  static final GlobalKey<FormState> _formKey =
+      GlobalKey<FormState>(); // Added GlobalKey
+  final TextEditingController titleController =
+      TextEditingController(); // Persistent controller
+  final TextEditingController descriptionController =
+      TextEditingController(); // Persistent controller
 
   @override
   Widget build(BuildContext context) {
     var mediaProvider = Provider.of<MediaProvider>(context);
-    final TextEditingController titleController = TextEditingController();
-    final TextEditingController descriptionController = TextEditingController();
-    LatLng? selectedLocation; // Store selected location
 
+    // Get the video controller from MediaProvider
+    VideoPlayerController? videoController = mediaProvider.videoController;
+    var screenWidth = MediaQuery.of(context).size.width;
+    var screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       body: SingleChildScrollView(
-        child: Column(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              _buildHeader(context),
+              _buildTitleSection(),
+              _buildTextField(titleController, "Add a title for your request"),
+              _buildTextField(descriptionController,
+                  "Provide a detailed description of the problem",
+                  maxLines: 4),
+              _buildMediaButtons(context, mediaProvider),
+              _buildMapButton(context),
+              _buildMediaPreview(mediaProvider),
+              // Video Preview Section
+              if (videoController != null &&
+                  videoController.value.isInitialized)
+                _buildVideoPreview(mediaProvider),
+              _buildSubmitButton(context, mediaProvider, titleController,
+                  descriptionController, field),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return ClipPath(
+      clipper: CurvedEdges(),
+      child: Container(
+        height: 150,
+        decoration: const BoxDecoration(color: Colors.blue),
+        child: Stack(
           children: [
-            // Header Section
-            ClipPath(
-              clipper: CurvedEdges(),
-              child: Container(
-                height: 150,
-                decoration: const BoxDecoration(color: Colors.blue),
-                child: Stack(
-                  children: [
-                    const Positioned(
-                      top: -150,
-                      right: -250,
-                      child: CircularContainer(),
-                    ),
-                    const Positioned(
-                      top: 100,
-                      right: -300,
-                      child: CircularContainer(),
-                    ),
-                    Positioned(
-                      top: 40,
-                      left: 10,
-                      child: IconButton(
-                        icon: const Icon(Icons.arrow_back, color: Colors.white),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
+            const Positioned(
+                top: -150, right: -250, child: CircularContainer()),
+            const Positioned(top: 100, right: -300, child: CircularContainer()),
+            Positioned(
+              top: 40,
+              left: 10,
+              child: IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: Text(
+                            'are you sure you want to discard this request'),
+                        actions: [
+                          ElevatedButton(
+                            onPressed: Navigator.of(ctx).pop,
+                            child: Text('No'),
+                          ),
+                          ElevatedButton(
+                            onPressed:(){
+                              Provider.of<MediaProvider>(context, listen: false).clearMedia();
+                              Navigator.of(context).pop();
+                              Navigator.of(ctx).pop();
+                              },
+                            child: Text('Yes'),
+                          ),
+                        ],
                       ),
-                    ),
-                    Positioned(
-                      top: 50,
-                      left: 60,
-                      child: const Text(
-                        'Handy.',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 25,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            // Title Section
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                'In need of an ${field.profession}!',
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 25,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            const Text(
-              'Help us understand your problem..',
-              style: TextStyle(fontSize: 18),
-            ),
-            const Divider(),
-            // Request Title Field
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                controller: titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Add a title for your request',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ),
-            // Description Field
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                controller: descriptionController,
-                maxLines: 4,
-                decoration: const InputDecoration(
-                  labelText: 'Provide a detailed description of the problem',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ),
-            // Image and Video Upload Buttons
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: () => _showImageSourceDialog(context),
-                    icon: const Icon(Icons.image),
-                    label: const Text('Upload Images'),
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: () => _showVideoSourceDialog(context),
-                    icon: const Icon(Icons.videocam),
-                    label: const Text('Upload Video'),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => MapPage()),
-                  );
-                },
-                icon: const Icon(Icons.map),
-                label: const Text('Open Google Maps'),
-              ),
-            ),
-            const Divider(),
-            // Display Selected Media
-            if ((mediaProvider.selectedImages != null &&
-                mediaProvider.selectedImages!.isNotEmpty) ||
-                (mediaProvider.controller != null &&
-                    mediaProvider.controller!.value.isInitialized))
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Wrap(
-                  spacing: 8.0,
-                  runSpacing: 8.0,
-                  children: [
-                    // Display Images
-                    if (mediaProvider.selectedImages != null &&
-                        mediaProvider.selectedImages!.isNotEmpty)
-                      ...mediaProvider.selectedImages!
-                          .map((image) =>
-                          Image.file(image, width: 100, height: 100))
-                          .toList(),
-                    // Display Video
-                    if (mediaProvider.controller != null &&
-                        mediaProvider.controller!.value.isInitialized)
-                      SizedBox(
-                        width: 100,
-                        height: 100,
-                        child: AspectRatio(
-                          aspectRatio:
-                          mediaProvider.controller!.value.aspectRatio,
-                          child: VideoPlayer(mediaProvider.controller!),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ElevatedButton(
-              onPressed: () async {
-                String? userId = FirebaseAuth.instance.currentUser?.uid;
-                if (userId == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("User not logged in")),
-                  );
-                  return;
-                }
-                // Use the new DatabaseService methods
-                List<Map<String, dynamic>> mediaList = [];
-                if (mediaProvider.selectedImages != null) {
-                  mediaList.addAll(mediaProvider.selectedImages!
-                      .map((file) => {"type": "image", "file": file, "priority": "1",}));
-                }
-                if (mediaProvider.selectedVideo != null) {
-                  mediaList.add({
-                    "type": "video",
-                    "file": mediaProvider.selectedVideo!,
-                    "priority": "2",
-                  });
-                }
-                final dbService = DatabaseService(uid: userId);
-                // Collect data from user inputs
-                String title = titleController.text.trim();
-                String description = descriptionController.text.trim();
-                String uid = userId;
-                // Validate inputs
-                if (title.isEmpty || description.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Title and description cannot be empty")),
-                  );
-                  return;
-                }
-
-                // Collect location and media
-                LatLng? selectedLocation = globalLastTappedLocation;
-                if (selectedLocation == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Please select a location")),
-                  );
-                  return;
-                }
-                List<String> imageUrls = [];
-                String videoUrl = '';
-
-                // Upload media and save request
-                try {
-                  // Upload images
-                  if (mediaProvider.selectedImages != null) {
-                    for (var image in mediaProvider.selectedImages!) {
-                      String imageUrl = await dbService.uploadMediaToStorage(
-                        image,
-                          'Users/$userId/Images',
-                      );
-                      if (imageUrl.isNotEmpty) {
-                        imageUrls.add(imageUrl);
-                      }
-                    }
-                  }
-
-                  // Upload video
-                  if (mediaProvider.selectedVideo != null) {
-                    videoUrl = await dbService.uploadMediaToStorage(
-                      mediaProvider.selectedVideo!,
-                      'Users/$userId/Videos',
                     );
-                  }
-
-                  // Save request data to Firestore
-                  await dbService.saveRequestData(
-                    title: title,
-                    description: description,
-                    location: selectedLocation,
-                    images: imageUrls,
-                    video: videoUrl,
-                    status: false,
-                    field: field.fieldName
-                  );
-
-                  await dbService.saveRequestData_request(
-                    title: title,
-                    description: description,
-                    location: selectedLocation,
-                    images: imageUrls,
-                    video: videoUrl,
-                    service: '',
-                    userId: uid,
-                    status: false,
-                    field : field.fieldName
-
-                  );
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Request submitted successfully!")),
-                  );
-
-                  Navigator.pop(context); // Return to the previous screen
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Failed to upload: $e")),
-                  );
-                }
-              },
-              child: const Text('Submit'),
+                  }),
+            ),
+            Positioned(
+              top: 50,
+              left: 60,
+              child: const Text(
+                'Handy.',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 25,
+                    fontStyle: FontStyle.italic),
+              ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildTitleSection() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Text(
+        'In need of an ${field.profession}!',
+        style: const TextStyle(
+            color: Colors.black, fontSize: 25, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+  Widget _buildTextField(TextEditingController controller, String label,
+      {int maxLines = 1}) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: TextField(
+        controller: controller,
+        maxLines: maxLines,
+        decoration: InputDecoration(
+            labelText: label, border: const OutlineInputBorder()),
+      ),
+    );
+  }
+
+  Widget _buildMediaButtons(BuildContext context, MediaProvider mediaProvider) {
+    var screenWidth = MediaQuery.of(context).size.width;
+    var screenHeight = MediaQuery.of(context).size.height;
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Flexible(
+            child: ElevatedButton.icon(
+              onPressed: () => _showImageSourceDialog(context),
+              icon: const Icon(Icons.image),
+              label: const Text('Upload Images'),
+            ),
+          ),
+          SizedBox(
+            width: screenWidth*0.02,
+          ),
+          Flexible(
+            child: ElevatedButton.icon(
+              onPressed: () => _showVideoSourceDialog(context),
+              icon: const Icon(Icons.videocam),
+              label: const Text('Upload Video'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMapButton(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: ElevatedButton.icon(
+        onPressed: () => Navigator.push(
+            context, MaterialPageRoute(builder: (context) => MapPage())),
+        icon: const Icon(Icons.map),
+        label: const Text('Open Google Maps'),
+      ),
+    );
+  }
+
+  Widget _buildMediaPreview(MediaProvider mediaProvider) {
+    return mediaProvider.hasMedia
+        ? Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Wrap(
+                  spacing: 8.0,
+                  runSpacing: 8.0,
+                  children: mediaProvider.selectedImages.map((image) {
+                    int imageIndex =
+                        mediaProvider.selectedImages.indexOf(image);
+                    return Stack(
+                      children: [
+                        Image.file(image, width: 100, height: 100),
+                        Positioned(
+                          top: 5,
+                          right: 5,
+                          child: IconButton(
+                            icon: Icon(Icons.remove_circle, color: Colors.red),
+                            onPressed: () {
+                              // Remove the image from the list
+                              mediaProvider.removeImage(imageIndex);
+                            },
+                          ),
+                        ),
+                      ],
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+          )
+        : const SizedBox();
+  }
+
+  Widget _buildVideoPreview(MediaProvider mediaProvider) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+        margin: EdgeInsets.only(top: 50),
+        decoration: BoxDecoration(
+            border: Border.all(color: Colors.white), color: Colors.black),
+        width: 300,
+        height: 300,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            AspectRatio(
+              aspectRatio: mediaProvider.videoController!.value.aspectRatio,
+              child: VideoPlayer(mediaProvider.videoController!),
+            ),
+            Positioned(
+              child: IconButton(
+                icon: Icon(
+                  mediaProvider.videoController!.value.isPlaying
+                      ? Icons.pause_circle_filled
+                      : Icons.play_circle_fill,
+                  color: Colors.white,
+                  size: 40,
+                ),
+                onPressed: () {
+                  mediaProvider.videoController!.value.isPlaying
+                      ? mediaProvider.videoController!.pause()
+                      : mediaProvider.videoController!.play();
+                },
+              ),
+            ),
+            Positioned(
+              top: 5,
+              right: 5,
+              child: IconButton(
+                icon: Icon(Icons.remove_circle, color: Colors.red),
+                onPressed: () {
+                  mediaProvider.removeVideo();
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSubmitButton(
+    BuildContext context,
+    MediaProvider mediaProvider,
+    TextEditingController titleController,
+    TextEditingController descriptionController,
+    ServiceCardModel field,
+  ) {
+    return ElevatedButton(
+      onPressed: () async {
+        // Check if the location is selected
+        if (globalLastTappedLocation == null) {
+          // If location is not selected, show a snack bar or a dialog
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text("Please select a location on the map.")),
+          );
+          return;
+        }
+
+        // Call the submitRequest method with the location
+        await RequestService.submitRequest(
+          context,
+          mediaProvider,
+          titleController,
+          descriptionController,
+          field,
+        );
+      },
+      child: const Text('Submit'),
     );
   }
 
@@ -298,8 +305,7 @@ class RequestScreen extends StatelessWidget {
       builder: (ctx) => AlertDialog(
         title: const Text('Choose Image Source'),
         content: const Text(
-          'Do you want to pick from the gallery or take pictures using the camera?',
-        ),
+            'Do you want to pick from the gallery or take pictures using the camera?'),
         actions: [
           TextButton(
             onPressed: () {
@@ -329,8 +335,7 @@ class RequestScreen extends StatelessWidget {
       builder: (ctx) => AlertDialog(
         title: const Text('Choose Video Source'),
         content: const Text(
-          'Do you want to pick a video from the gallery or record using the camera?',
-        ),
+            'Do you want to pick a video from the gallery or record using the camera?'),
         actions: [
           TextButton(
             onPressed: () {

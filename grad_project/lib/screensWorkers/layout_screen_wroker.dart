@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:grad_project/layout_cubit/layout_cubit.dart';
 
-import '../layout_cubit/layout_states.dart';
+import 'package:grad_project/state_management/cubits/layout_cubit/layout_cubit.dart';
+import 'package:grad_project/state_management/cubits/layout_cubit/layout_states.dart';
+
+
 
 class LayoutScreenWorker extends StatelessWidget {
   const LayoutScreenWorker({super.key});
@@ -25,7 +27,7 @@ class LayoutScreenWorker extends StatelessWidget {
             ),
             child: BottomNavigationBar(
               backgroundColor: Colors.blue,
-
+              type: BottomNavigationBarType.fixed,
               currentIndex: cubit.currentIndex,
               onTap: (int index) {
                 cubit.ChangeCurrentIndex(index);
@@ -36,9 +38,14 @@ class LayoutScreenWorker extends StatelessWidget {
                   label: 'Home',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.history),
-                  label: 'history',
+                  icon: Icon(Icons.request_page),
+                  label: 'offers',
                 ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.local_offer),
+                  label: 'Orders',
+                ),
+                
                 BottomNavigationBarItem(
                   icon: Icon(Icons.person),
                   label: 'profile',

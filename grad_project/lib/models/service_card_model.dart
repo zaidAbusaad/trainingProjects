@@ -7,4 +7,14 @@ class ServiceCardModel {
   String? profession;
 
   ServiceCardModel({required this.fieldIcon, required this.fieldName, this.profession});
+
+  factory ServiceCardModel.fromMap(Map<String, dynamic> data) {
+    return ServiceCardModel(
+      fieldName: data['fieldName'] ?? '',
+      fieldIcon: Icon(
+        IconData(data['fieldIcon'] ?? 0xe3af, fontFamily: 'MaterialIcons'),
+        color: Colors.blue,
+      ),
+    );
+  }
 }

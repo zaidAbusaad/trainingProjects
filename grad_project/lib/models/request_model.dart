@@ -1,26 +1,23 @@
-import 'dart:io';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 
 class RequestModel {
-  final String? title; // Request title
-  final String? description; // Detailed description
-  final LatLng? location; // Latitude and longitude
-  final List<File>? images; // List of selected image files
-  final File? video;
-  final String? field; // Selected video file
+  final String? title;
+  final String? description;
+  final LatLng? location;
+  final List<String>? images; // CHANGE from List<File>? to List<String>?
+  final String? video; // Store video URL as String, not File
+  final String? field;
 
   RequestModel({
-    this.field,
     this.title,
     this.description,
     this.location,
     this.images,
     this.video,
+    this.field,
   });
 
-  // Convert to a Firestore-compatible map
+  // Convert to Firestore map
   Map<String, dynamic> toMap() {
     return {
       'title': title,
@@ -28,9 +25,23 @@ class RequestModel {
       'location': location != null
           ? {'latitude': location!.latitude, 'longitude': location!.longitude}
           : null,
-      'images': images ?? [], // Store image URLs
-      'video': video ?? '', // Store video URL
+      'images': images ?? [], // Store image URLs as List<String>
+      'video': video ?? '', // Store video URL as String
       'field': field,
     };
+  }
+
+  // Convert Firestore map to RequestModel
+  factory RequestModel.fromMap(Map<String, dynamic> data) {
+    return RequestModel(
+      title: data['title'] as String?,
+      description: data['description'] as String?,
+      location: data['location'] != null
+          ? LatLng(data['location']['latitude'], data['location']['longitude'])
+          : null,
+      images: (data['images'] as List<dynamic>?)?.map((item) => item.toString()).toList(),
+      video: data['video'] != null ? data['video'] as String : null, // Store video as String
+      field: data['field'] as String?,
+    );
   }
 }

@@ -1,7 +1,7 @@
 import 'package:ecommerceapp/models/item_model.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../services/database.dart';
 import 'product_state.dart';
 
 class ProductCubit extends Cubit<ProductStates> {
@@ -35,46 +35,58 @@ class ProductCubit extends Cubit<ProductStates> {
         itemName: 'Running shoes',
         price: 60),
   ];
-
   List<ItemModel> cartItems = [];
-
 
   void increment(ItemModel item) {
     item.qty++;
+
     emit(IncrementSuccess());
   }
 
   void decrement(ItemModel item) {
-    if (item.qty > 1) {
+    if (item.qty >= 2) {
       item.qty--;
+    } else if (item.qty == 1) {
     }
     emit(DecrementSuccess());
   }
 
-  void removeItem(ItemModel item) {
-    cartItems.remove(item);
-    emit(ProductUpdated(cartItems));
+  void changeIsFavorite(ItemModel item) {
+    item.isFavorite = !item.isFavorite;
+    emit(SuccessChangeIsFavorite());
   }
 
   void addItem(ItemModel item) {
-    bool isFound = cartItems.any((element) => element.itemName == item.itemName);
+    bool isFound = cartItems.any(
+      (element) => element.itemName == item.itemName,
+    );
     if (isFound) {
       increment(item);
     } else {
       item.qty = 1;
       cartItems.add(item);
     }
-    emit(ProductUpdated(cartItems));
   }
-  void changeIsFavorite(ItemModel item) {
-    item.isFavorite = !item.isFavorite;
-    emit(SuccessChangeIsFavorite());
+
+  Future<bool?> ? _showPopUp(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Are you sure you want to remove this item'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(true);
+
+                },
+                child: Text('confirm'),
+              ),
+              TextButton(onPressed: (){
+                Navigator.of(context).pop(false);
+              }, child: Text('cancel'))
+            ],
+          );
+        });
   }
 }
-
-
-
-
-
-
-

@@ -1,22 +1,10 @@
 import 'package:ecommerceapp/layout_cubit/layout_cubit.dart';
 import 'package:ecommerceapp/list_cubit/product_cubit.dart';
-import 'package:ecommerceapp/screens/authenticate/authenticate.dart';
-import 'package:ecommerceapp/screens/cart_screen.dart';
 import 'package:ecommerceapp/screens/layout_screen.dart';
-import 'package:ecommerceapp/screens/wrapper.dart';
-import 'package:ecommerceapp/services/auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import'package:provider/provider.dart';
-import 'firebase_options.dart';
-import 'models/user.dart';
 
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+void main() {
   runApp(const MyApp());
 }
 
@@ -33,17 +21,12 @@ class MyApp extends StatelessWidget {
         BlocProvider(
           create: (context) => LayoutCubit(),
         ),
-        StreamProvider<AppUser?>.value(
-          value: AuthService().firebaseUser, // Use the correct stream here
-          initialData: null,
-        ),
       ],
-      child: MaterialApp(
+      child: const MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: Wrapper(),
+        home: LayoutScreen(),
       ),
     );
-
   }
 }
 //       BlocProvider<HomeCubit>(

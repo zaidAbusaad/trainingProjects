@@ -10,17 +10,18 @@ class ItemScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ProductCubit cubit = ProductCubit.get(context);
+
+    void updateSelectedSize(String size) {
+      item.size = size; // Updated to handle size selection
+    }
+
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        //backgroundColor: Colors.transparent,
-        // backgroundColor: Colors.cyan,
-
         title: const Center(
           child: Text(
             'shopIn',
-            style:
-            TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
           ),
         ),
         actions: <Widget>[
@@ -106,14 +107,13 @@ class ItemScreen extends StatelessWidget {
                     style:
                     const TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
                   )),
-              SizeGrid(),
+              SizeGrid(onSizeSelected: updateSelectedSize),
 
               Container(
                   margin: const EdgeInsets.symmetric(horizontal: 15),
                   child: const Text('Description')),
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 18,),
-
                 child: const Text('they were made for consumers who may or may not love basketball (who may or may not even play sports) and from any walk of life.',
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
@@ -127,8 +127,6 @@ class ItemScreen extends StatelessWidget {
                       height: 75,
                       width: 150,
                       child: FloatingActionButton(onPressed: (){
-
-
                         cubit.addItem(item);
                       },
                           child: const Text('Add To Cart')),

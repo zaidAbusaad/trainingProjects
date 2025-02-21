@@ -1,31 +1,26 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:grad_project/models/service_card_model.dart';
-import 'package:grad_project/screensWorkers/single_request_screen.dart';
+import 'package:grad_project/components/header.dart';
 
-import '../components/cutom_shapes/circular_container.dart';
-import '../components/cutom_shapes/curved_edges.dart';
-import '../components/header.dart';
 import '../components/request_card.dart';
+import '../screensWorkers/single_request_screen.dart';
 
-class RequestsScreenWorker extends StatelessWidget {
-  const RequestsScreenWorker({super.key, required this.field});
 
-  final ServiceCardModel field;
+class PendingRequestsScreen extends StatelessWidget {
+  const PendingRequestsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    var fieldName = field.fieldName;
-
     return Scaffold(
       body: Column(
         children: [
-         Header(title:'$fieldName Requests' ,backBtn: true,),
+          Header(title: 'Your Request', backBtn: false),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('Requests')
-                  .where('field', isEqualTo: fieldName)
+                  .where('userId', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
               .where('status',isEqualTo: false)
                   .snapshots(),
               builder: (context, snapshot) {
@@ -36,12 +31,12 @@ class RequestsScreenWorker extends StatelessWidget {
                   return const Center(child: Text('No requests found.'));
                 }
 
-                final requests = snapshot.data!.docs;
+                final offerDocs = snapshot.data!.docs;
 
                 return ListView.builder(
-                  itemCount: requests.length,
+                  itemCount: offerDocs.length,
                   itemBuilder: (context, index) {
-                    final doc = requests[index];
+                    final doc = offerDocs[index];
                     final data = doc.data() as Map<String, dynamic>; // Cast data to Map
 
                     return RequestCard(
@@ -51,7 +46,7 @@ class RequestsScreenWorker extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => SingleRequestScreen(requestId: doc.id,isWorker: true,),
+                            builder: (context) => SingleRequestScreen(requestId: doc.id,isWorker: false,),
                           ),
                         );
                       },
@@ -60,7 +55,7 @@ class RequestsScreenWorker extends StatelessWidget {
                 );
               },
             ),
-          ),
+          )
 
         ],
       ),

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:grad_project/layout_cubit/layout_cubit.dart';
 
-import '../layout_cubit/layout_states.dart';
+import '../state_management/cubits/layout_cubit/layout_cubit.dart';
+import '../state_management/cubits/layout_cubit/layout_states.dart';
 
 class LayoutScreen extends StatelessWidget {
   const LayoutScreen({super.key});
@@ -19,36 +19,34 @@ class LayoutScreen extends StatelessWidget {
       bottomNavigationBar:
       BlocBuilder<LayoutCubit, LayoutStates>(
         builder: (context, state) {
-          return Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFDB58),
-              borderRadius: BorderRadius.circular(70),
+          return BottomNavigationBar(
+            backgroundColor: Colors.blue,
+            type: BottomNavigationBarType.fixed,
+            currentIndex: cubit.currentIndex,
+            onTap: (int index) {
+              cubit.ChangeCurrentIndex(index);
+            },
+            selectedItemColor: Colors.grey,
+            unselectedItemColor: Colors.white,
+            items:  const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home,color: Colors.white,),
+                label: 'Home',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.request_page),
+                label: 'Requests',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.local_offer,color: Colors.white,),
+                label: 'Orders',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person),
+                label: 'profile',
+              ),
 
-
-            ),
-            child: BottomNavigationBar(
-              backgroundColor: Colors.blue,
-
-              currentIndex: cubit.currentIndex,
-              onTap: (int index) {
-                cubit.ChangeCurrentIndex(index);
-              },
-              items:  const [
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.home,color: Colors.white,),
-                  label: 'Home',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.history),
-                  label: 'history',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.person),
-                  label: 'profile',
-                ),
-
-              ],
-            ),
+            ],
           );
         },
       ),
