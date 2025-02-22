@@ -19,9 +19,9 @@ class AcceptedOfferWorkerRepository {
       print("🔍 Fetching orders for workerId: $currentUserId");
 
       final ordersSnapshot = await _firebaseFirestore
-          .collection('orders')
+          .collection('orders') .where('status',isEqualTo: "ongoing")
           .where('workerId', isEqualTo: currentUserId)
-      .where('status',isEqualTo: 'ongoing')
+
           .get();
 
       if (ordersSnapshot.docs.isEmpty) {

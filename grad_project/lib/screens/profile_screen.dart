@@ -51,10 +51,10 @@ class _ProfilePageState extends State<ProfileScreen> {
             if (widget.isWorker) {
               professions = List<String>.from(userSnapshot['professions']);
             }
-
-            ratings = List<double>.from(userSnapshot['ratings']);
-            print(userSnapshot.data());
-
+          print("rating fetch start");
+            List<dynamic> rawRatings = userSnapshot['ratings'] ?? [];
+            ratings = rawRatings.map((rating) => (rating is int) ? rating.toDouble() : rating as double).toList();
+            print("rating fetch ends");
           });
         }
 
@@ -78,6 +78,7 @@ class _ProfilePageState extends State<ProfileScreen> {
       });
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -140,6 +141,13 @@ class _ProfilePageState extends State<ProfileScreen> {
                       ),
                       ),
                     ],
+                    // ElevatedButton(
+                    //   onPressed: () => _logout(context),
+                    //   style: ElevatedButton.styleFrom(
+                    //     backgroundColor: Colors.grey, // Logout button color
+                    //   ),
+                    //   child: const Text('History',style: TextStyle(color: Colors.white),),
+                    // ),
                     ElevatedButton(
                       onPressed: () => _logout(context),
                       style: ElevatedButton.styleFrom(

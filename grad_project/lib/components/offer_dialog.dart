@@ -264,7 +264,7 @@ void showCustomDialog(BuildContext context,
                             style: OutlinedButton.styleFrom(
                                 side: BorderSide(color: theme.primaryColor)),
                             onPressed: () {
-                              Provider.of<OfferProvider>(context, listen: false).setPending();
+                             // Provider.of<OfferProvider>(context, listen: false).setPending();
                               Navigator.pop(context);
                             },
                             child: const Text('Close'),
