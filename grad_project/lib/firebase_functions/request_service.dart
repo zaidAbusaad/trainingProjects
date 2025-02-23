@@ -62,15 +62,6 @@ class RequestService {
         status: false,
         field: field.fieldName,
       );
-      await dbService.saveRequestData(
-          title: titleController.text.trim(),
-          description: descriptionController.text.trim(),
-          location: selectedLocation,
-          images: imageUrls,
-          video: videoUrl,
-          status: false,
-          field: field.fieldName
-      );
 
       await dbService.saveRequestData_request(
           title: titleController.text.trim(),

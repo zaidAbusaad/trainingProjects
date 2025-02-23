@@ -267,10 +267,10 @@ void showCustomDialog(BuildContext context,
                              // Provider.of<OfferProvider>(context, listen: false).setPending();
                               Navigator.pop(context);
                             },
-                            child: const Text('Close'),
+                            child:Icon(Icons.cancel_outlined),
                           ),
                         ),
-                        SizedBox(width: constraints.maxWidth * 0.02),
+                        SizedBox(width: constraints.maxWidth * 0.01),
                         Flexible(
                           flex: 1,
                           child: ElevatedButton(
@@ -291,14 +291,14 @@ void showCustomDialog(BuildContext context,
                               'Decline',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: MediaQuery.of(context).size.width * 0.03, // Adjust font size as needed
+                                fontSize: MediaQuery.of(context).size.width * 0.025, // Adjust font size as needed
                               ),
                               overflow: TextOverflow.ellipsis, // Handle overflow
                               softWrap: true, // Wrap text to prevent cutting off
                             ),
                           ),
                         ),
-                        SizedBox(width: constraints.maxWidth * 0.02),
+                        SizedBox(width: constraints.maxWidth * 0.01),
                         Flexible(
                           flex: 1,  // Same as above
                           child: ElevatedButton(
@@ -318,7 +318,9 @@ void showCustomDialog(BuildContext context,
                             },
                             child: Text(
                               'Accept Offer',
-                              style: TextStyle(fontSize: MediaQuery.of(context).size.width * 0.03),
+                              style: TextStyle(fontSize: MediaQuery.of(context).size.width * 0.025),
+                              overflow: TextOverflow.ellipsis, // Handle overflow
+                              softWrap: true,
                             ),
                           ),
                         ),

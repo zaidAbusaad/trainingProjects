@@ -55,7 +55,7 @@ class _SignUpScreen2State extends State<SignUpScreen2> {
               const Text(
                 'Handy',
                 style: TextStyle(
-                  color: Color(0xFFFFDB58),
+                  color: Colors.blue,
                   fontSize: 25,
                   fontWeight: FontWeight.bold,
                 ),

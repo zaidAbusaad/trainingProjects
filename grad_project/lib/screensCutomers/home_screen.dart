@@ -27,15 +27,19 @@ class HomeScreen extends StatelessWidget {
                 height: screenHeight * .3,
                 child: Stack(
                   children: [
-                     Positioned(
+                    Positioned(
                       top: -150,
                       right: -250,
-                      child: CircularContainer(bgColor: Colors.white.withOpacity(0.3),),
+                      child: CircularContainer(
+                        bgColor: Colors.white.withOpacity(0.3),
+                      ),
                     ),
-                     Positioned(
+                    Positioned(
                       top: 100,
                       right: -300,
-                      child: CircularContainer(bgColor: Colors.white.withOpacity(0.3),),
+                      child: CircularContainer(
+                        bgColor: Colors.white.withOpacity(0.3),
+                      ),
                     ),
                     const Positioned(
                       top: 50,
@@ -49,38 +53,67 @@ class HomeScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Positioned(
+
+                    Positioned.fill(
                       top: 50,
-                      left: 130,
-                      right: 20,
-                      child: Container(
-                        width: screenWidth*0.5,
-                        padding: const EdgeInsets.symmetric(horizontal: 15),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(30),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 10,
-                            ),
-                          ],
-                        ),
-                        child: const TextField(
-                          decoration: InputDecoration(
-                            hintText: 'Search...',
-                            border: InputBorder.none,
-                            icon: Icon(Icons.search),
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2), // Soft shadow
+                                blurRadius: 10,
+                                spreadRadius: 5,
+                              ),
+                            ],
+                            borderRadius: BorderRadius.circular(20), // Smooth corners
+                          ),
+                          padding: EdgeInsets.all(10), // Adds spacing around image
+                          child: Image.asset(
+                            'lib/components/images/iii.jpeg', // Make sure the path is correct!
+                            width: 200, // Increased size
+                            height: 160, // Increased size
+                            fit: BoxFit.cover, // Better scaling
                           ),
                         ),
                       ),
                     ),
+
+                    // Positioned(
+                    //   top: 50,
+                    //   left: 130,
+                    //   right: 20,
+                    //   child: Container(
+                    //     width: screenWidth*0.5,
+                    //     padding: const EdgeInsets.symmetric(horizontal: 15),
+                    //     decoration: BoxDecoration(
+                    //       color: Colors.white,
+                    //       borderRadius: BorderRadius.circular(30),
+                    //       boxShadow: const [
+                    //         BoxShadow(
+                    //           color: Colors.black12,
+                    //           blurRadius: 10,
+                    //         ),
+                    //       ],
+                    //     ),
+                    //     child: const TextField(
+                    //       decoration: InputDecoration(
+                    //         hintText: 'Search...',
+                    //         border: InputBorder.none,
+                    //         icon: Icon(Icons.search),
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
               ),
             ),
           ),
-          const ServiceGrid(isCustomer: true,),
+          const ServiceGrid(
+            isCustomer: true,
+          ),
         ],
       ),
     );

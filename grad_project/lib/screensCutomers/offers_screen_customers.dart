@@ -151,26 +151,44 @@ class _OffersScreenCustomersState extends State<OffersScreenCustomers> {
                           SizedBox(height: 4),
                           // Worker Info
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              Icon(Icons.person_outline,
-                                  size: 18, color: Colors.grey[600]),
+                              Icon(Icons.person_outline, size: 18, color: Colors.grey[600]),
+
                               SizedBox(width: 4),
-                              Text(
-                                offer.worker?.name ?? 'Unknown Worker',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.grey[700],
+
+                              // ✅ Use Expanded to prevent overflow
+                              Expanded(
+                                child: Text(
+                                  offer.worker?.name ?? 'Unknown Worker',
+                                  style: TextStyle(
+                                    fontSize: MediaQuery.of(context).size.width * 0.04, // Responsive text size
+                                    color: Colors.grey[700],
+                                  ),
+                                  overflow: TextOverflow.ellipsis, // Prevents text from overflowing
+                                  maxLines: 1, // Ensures single-line text
                                 ),
                               ),
-                              SizedBox(width: 5,),
-                              Icon(Icons.star_rate,color: Colors.yellow,),
-                              Text(
-                                'Rate: ${offer.worker.ratings != null && offer.worker.ratings!.isNotEmpty
-                                    ? (offer.worker.ratings!.reduce((a, b) => a + b) / offer.worker.ratings!.length).toStringAsFixed(1)
-                                    : 'Not Rated'}',
-                              )
+
+                              SizedBox(width: 5),
+
+                              Icon(Icons.star_rate, color: Colors.yellow),
+
+                              // ✅ Wrap rating text inside Flexible to prevent overflow
+                              Flexible(
+                                child: Text(
+                                  'Rate: ${offer.worker.ratings != null && offer.worker.ratings!.isNotEmpty
+                                      ? (offer.worker.ratings!.reduce((a, b) => a + b) / offer.worker.ratings!.length).toStringAsFixed(1)
+                                      : 'Not Rated'}',
+                                  style: TextStyle(
+                                    fontSize: MediaQuery.of(context).size.width * 0.035, // Responsive font size
+                                  ),
+                                  overflow: TextOverflow.ellipsis, // Avoids breaking layout
+                                ),
+                              ),
                             ],
                           ),
+
                         ],
                       ),
                     ),

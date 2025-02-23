@@ -49,32 +49,7 @@ class HomeScreenWorker extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Positioned(
-                      top: 50,
-                      left: 130,
-                      right: 20,
-                      child: Container(
-                        width: screenWidth*0.5,
-                        padding: const EdgeInsets.symmetric(horizontal: 15),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(30),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 10,
-                            ),
-                          ],
-                        ),
-                        child: const TextField(
-                          decoration: InputDecoration(
-                            hintText: 'Search...',
-                            border: InputBorder.none,
-                            icon: Icon(Icons.search),
-                          ),
-                        ),
-                      ),
-                    ),
+
                   ],
                 ),
               ),
