@@ -1,16 +1,3 @@
-# grad_project
-
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Handy is a mobile app built with Flutter that connects people in Jordan with home service providers such as plumbers, electricians, painters, carpenters, and cleaners.
+Clients can post service requests describing what they need, including photos, videos, and their location. Nearby workers in the relevant category can browse these requests and submit offers with their price. Once a client accepts an offer, an order is created and both sides can track its progress in real time, and contact one another directly.
+After a job is completed, clients can rate and review the worker, helping build trust and reputation within the community. The goal of Handy is to make finding reliable, affordable home services in Jordan simple, fast, and transparent for everyone.
